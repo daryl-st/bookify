@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  bookings     Booking[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Service {
+  id              String        @id @default(uuid())
+  name            String
+  description     String?
+  priceCents      Int           // store as integer cents to avoid floating issues
+  currency        String        @default("USD")
+  durationMinutes Int           // default slot duration for this service
+  capacity        Int           @default(1)
+  bookings        Booking[]
+  availability    Availability[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Availability {
+  id              String   @id @default(uuid())
+  service         Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId       String
+  // Either dayOfWeek (0-6) for weekly repeating, or date for a specific day
+  dayOfWeek       Int?
+  date            DateTime?
+  openTime        String   // HH:mm (24h)
+  closeTime       String   // HH:mm (24h)
+  durationMinutes Int      // minutes per slot for this availability
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  service    Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId  String
+  startTime  DateTime
+  endTime    DateTime
+  status     BookingStatus @default(CONFIRMED)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([serviceId, startTime])
+  @@unique([serviceId, startTime])
+}
+
