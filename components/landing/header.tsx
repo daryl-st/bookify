@@ -69,7 +69,7 @@ export function Header() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <Link href="/register">
+        <Link href="/auth/register">
           <Button className="group bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
             Get Started
             <Sparkles className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
