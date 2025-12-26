@@ -3,20 +3,25 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../../../components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../components/ui/card";
 import { Checkbox } from "../../../components/ui/checkbox";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormData = {
-    name: string,
-    email: string,
-    password: string,
-    cpassword: string,
-}
+const schema = z.object({
+    name: z.string(),
+    email: z.string(),
+    password: z.string().min(8, "Password too short..."),
+    cpassword: z.string(),
+})
 
 export default function Register() {
-    const form = useForm<FormData>({
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
+        mode: "onChange",
         defaultValues: {
             name: "",
             email: "",
@@ -24,6 +29,8 @@ export default function Register() {
             cpassword: "",
         },
     })
+
+    const router = useRouter();
 
     // const onSubmit = (values: FormData) => {
     //     console.log("Form Data: ", values);
@@ -46,7 +53,7 @@ export default function Register() {
             alert("Welcome: " +  result.user.name)
 
             // save tokens or user data if API returns (localStorage.setItem)
-            // router.push("/");
+            router.push("/");
         } catch (err: unknown) {
             if (err instanceof Error) {
                 alert(err.message);
@@ -101,6 +108,7 @@ export default function Register() {
                                         <FormControl>
                                             <Input type="password" placeholder="********" {...field}/>
                                         </FormControl>
+                                        <FormMessage className="text-red-500"/>
                                     </FormItem>
                                 )}
                             />

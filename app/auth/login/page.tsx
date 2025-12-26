@@ -3,21 +3,24 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../../../components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "../../../components/ui/card";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormData = {
-    email: string,
-    password: string,
-}
+const schema =  z.object({
+    email: z.string(),
+    password: z.string().min(8, "Password must be at least 8 characters!")
+})
 
 export default function Register() {
-    // const router = useRouter();
+    const router = useRouter();
     
-    const form = useForm<FormData>({
-        mode: "onBlur",
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
+        mode: "onChange",
         defaultValues: {
             email: "",
             password: "",
@@ -45,7 +48,7 @@ export default function Register() {
             alert("Welcome: " +  result.user.name)
 
             // save tokens or user data if API returns (localStorage.setItem)
-            // router.push("/");
+            router.push("/");
         } catch (err: unknown) {
             if (err instanceof Error) {
                 alert(err.message);
@@ -74,6 +77,7 @@ export default function Register() {
                                         <FormControl>
                                             <Input type="email" placeholder="m@example.com" {...field}/>
                                         </FormControl>
+                                        <FormMessage className="text-red-500" />
                                         {fieldState.error && (
                                             <p className="text-red-500 text-sm">{fieldState.error.message}</p>
                                         )}
