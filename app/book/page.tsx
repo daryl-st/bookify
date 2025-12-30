@@ -5,25 +5,15 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { AppHeader } from "@/components/shared/app-header";
 
 type Service = {
   id: string;
@@ -98,7 +88,6 @@ function generateSlotsForDate(
       const slotEnd = new Date(cursor.getTime() + duration * 60000);
       if (slotEnd > end) break;
 
-      // Filter out slots in the past for today
       if (cursor > now) {
         const label = format(cursor, "HH:mm");
         slots.push(label);
@@ -108,7 +97,6 @@ function generateSlotsForDate(
     }
   }
 
-  // Deduplicate and sort
   const unique = Array.from(new Set(slots));
   unique.sort();
   return unique;
@@ -121,15 +109,11 @@ export default function BookPage() {
   const [loadingServices, setLoadingServices] = useState(true);
   const [servicesError, setServicesError] = useState<string | null>(null);
 
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null
-  );
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
 
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
-  const [availabilityError, setAvailabilityError] = useState<string | null>(
-    null
-  );
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -168,7 +152,6 @@ export default function BookPage() {
     );
   }, [availability, selectedDate, selectedService]);
 
-  // Fetch services on mount
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -191,7 +174,6 @@ export default function BookPage() {
     fetchServices();
   }, []);
 
-  // Fetch availability when service changes
   useEffect(() => {
     if (!selectedServiceId) return;
 
@@ -200,9 +182,7 @@ export default function BookPage() {
         setLoadingAvailability(true);
         setAvailabilityError(null);
         const res = await fetch(
-          `/api/availability?serviceId=${encodeURIComponent(
-            selectedServiceId
-          )}`
+          `/api/availability?serviceId=${encodeURIComponent(selectedServiceId)}`
         );
         if (!res.ok) {
           throw new Error("Failed to load availability");
@@ -250,17 +230,15 @@ export default function BookPage() {
         );
       }
 
-      const data = await res.json();
       setBookingSuccess("Your booking is confirmed!");
       form.reset({
         date: values.date,
         time: "",
       });
 
-      // Navigate to bookings dashboard after a short delay
       setTimeout(() => {
-        router.push("/bookings");
-      }, 800);
+        router.push("/dashboard");
+      }, 1000);
     } catch (err) {
       setBookingError(
         err instanceof Error ? err.message : "Something went wrong"
@@ -271,75 +249,86 @@ export default function BookPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <main className="container mx-auto flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl space-y-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <AppHeader />
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Book a Service
             </h1>
-            <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Choose a service, pick a time that works for you, and confirm your
-              booking in just a few clicks.
+            <p className="mt-2 text-sm text-muted-foreground">
+              Select a service and choose your preferred time
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[2fr,1.2fr]">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Select a service</CardTitle>
+          <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
+            {/* Main Content */}
+            <div className="space-y-4">
+              {/* Service Selection */}
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Select Service</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   {loadingServices && (
-                    <p className="text-sm text-muted-foreground">
-                      Loading services...
-                    </p>
+                    <p className="text-xs text-muted-foreground">Loading...</p>
                   )}
                   {servicesError && (
-                    <p className="text-sm text-destructive">{servicesError}</p>
+                    <p className="text-xs text-destructive">{servicesError}</p>
                   )}
                   {!loadingServices && !servicesError && services.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      No services are available yet. Please check back later.
+                    <p className="text-xs text-muted-foreground">
+                      No services available
                     </p>
                   )}
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-2.5">
                     {services.map((service) => {
                       const isActive = service.id === selectedServiceId;
                       return (
                         <button
                           key={service.id}
                           type="button"
-                          onClick={() => setSelectedServiceId(service.id)}
-                          className={`flex flex-col rounded-xl border p-4 text-left transition-all hover:border-primary/60 hover:bg-accent/40 ${
+                          onClick={() => {
+                            setSelectedServiceId(service.id);
+                            form.setValue("time", "");
+                          }}
+                          className={`group relative flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
                             isActive
                               ? "border-primary bg-primary/5 shadow-sm"
-                              : "border-border bg-background"
+                              : "border-border bg-card hover:border-primary/40 hover:bg-accent/30"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="space-y-1">
-                              <div className="text-sm font-semibold sm:text-base">
-                                {service.name}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-foreground">
+                                  {service.name}
+                                </div>
+                                {service.description && (
+                                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                                    {service.description}
+                                  </p>
+                                )}
                               </div>
-                              {service.description && (
-                                <p className="text-xs text-muted-foreground sm:text-sm">
-                                  {service.description}
-                                </p>
-                              )}
+                              <Badge
+                                variant={isActive ? "default" : "outline"}
+                                className="shrink-0 text-xs"
+                              >
+                                {formatPrice(service.priceCents, service.currency)}
+                              </Badge>
                             </div>
-                            <Badge variant={isActive ? "default" : "outline"}>
-                              {formatPrice(
-                                service.priceCents,
-                                service.currency
-                              )}
-                            </Badge>
+                            <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {service.durationMinutes} min
+                              </span>
+                            </div>
                           </div>
-                          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{service.durationMinutes} min</span>
-                          </div>
+                          {isActive && (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                          )}
                         </button>
                       );
                     })}
@@ -347,192 +336,166 @@ export default function BookPage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Choose date & time</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {!selectedService && (
-                    <p className="text-sm text-muted-foreground">
-                      Select a service first to see available times.
-                    </p>
-                  )}
-
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(handleCreateBooking)}
-                      className="space-y-4"
-                    >
-                      <div className="grid gap-4 sm:grid-cols-[1.1fr,2fr]">
-                        <FormField
-                          control={form.control}
-                          name="date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Date</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  min={format(new Date(), "yyyy-MM-dd")}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div>
-                          <FormLabel>Available time slots</FormLabel>
-                          <div className="mt-2">
-                            {loadingAvailability && selectedService && (
-                              <p className="text-sm text-muted-foreground">
-                                Loading availability...
-                              </p>
+              {/* Date & Time Selection */}
+              {selectedService && (
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Choose Date & Time</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Form {...form}>
+                      <form
+                        onSubmit={form.handleSubmit(handleCreateBooking)}
+                        className="space-y-4"
+                      >
+                        <div className="space-y-3">
+                          <FormField
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm">Date</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                      type="date"
+                                      min={format(new Date(), "yyyy-MM-dd")}
+                                      className="pl-10"
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage className="text-xs" />
+                              </FormItem>
                             )}
-                            {availabilityError && (
-                              <p className="text-sm text-destructive">
-                                {availabilityError}
-                              </p>
-                            )}
-                            {!loadingAvailability &&
-                              selectedService &&
-                              !availabilityError &&
-                              slots.length === 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                  No available slots for this date. Try another
-                                  day.
+                          />
+
+                          <div>
+                            <FormLabel className="text-sm">Time Slot</FormLabel>
+                            <div className="mt-2">
+                              {loadingAvailability && (
+                                <p className="text-xs text-muted-foreground">
+                                  Loading availability...
                                 </p>
                               )}
-                            <div className="flex flex-wrap gap-2">
-                              {slots.map((slot) => {
-                                const isSelected =
-                                  form.watch("time") === slot;
-                                return (
-                                  <Button
-                                    key={slot}
-                                    type="button"
-                                    size="sm"
-                                    variant={
-                                      isSelected ? "default" : "outline"
-                                    }
-                                    onClick={() => form.setValue("time", slot)}
-                                  >
-                                    {slot}
-                                  </Button>
-                                );
-                              })}
+                              {availabilityError && (
+                                <p className="text-xs text-destructive">
+                                  {availabilityError}
+                                </p>
+                              )}
+                              {!loadingAvailability &&
+                                !availabilityError &&
+                                slots.length === 0 && (
+                                  <p className="text-xs text-muted-foreground">
+                                    No slots available for this date
+                                  </p>
+                                )}
+                              <div className="flex flex-wrap gap-2">
+                                {slots.map((slot) => {
+                                  const isSelected = form.watch("time") === slot;
+                                  return (
+                                    <Button
+                                      key={slot}
+                                      type="button"
+                                      size="sm"
+                                      variant={isSelected ? "default" : "outline"}
+                                      className="h-8 text-xs"
+                                      onClick={() => form.setValue("time", slot)}
+                                    >
+                                      {slot}
+                                    </Button>
+                                  );
+                                })}
+                              </div>
+                              <FormMessage className="text-xs" />
                             </div>
-                            <FormMessage />
                           </div>
                         </div>
-                      </div>
 
-                      {bookingError && (
-                        <p className="text-sm text-destructive">
-                          {bookingError}
-                        </p>
-                      )}
-                      {bookingSuccess && (
-                        <p className="text-sm text-emerald-600">
-                          {bookingSuccess}
-                        </p>
-                      )}
+                        {bookingError && (
+                          <div className="rounded-md bg-destructive/10 p-2.5 text-xs text-destructive">
+                            {bookingError}
+                          </div>
+                        )}
+                        {bookingSuccess && (
+                          <div className="flex items-center gap-2 rounded-md bg-emerald-50 p-2.5 text-xs text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            {bookingSuccess}
+                          </div>
+                        )}
 
-                      <div className="flex justify-end">
                         <Button
                           type="submit"
+                          className="w-full"
                           disabled={
-                            !selectedService || bookingLoading || !slots.length
+                            !selectedService || bookingLoading || !slots.length || !form.watch("time")
                           }
                         >
-                          {bookingLoading ? "Booking..." : "Confirm booking"}
+                          {bookingLoading ? "Confirming..." : "Confirm Booking"}
                         </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Booking summary</CardTitle>
+            {/* Summary Sidebar */}
+            <div className="lg:sticky lg:top-8 lg:h-fit">
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   {selectedService ? (
                     <>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">
-                          Service
-                        </span>
-                        <span className="font-medium">
-                          {selectedService.name}
-                        </span>
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Service</span>
+                          <span className="text-sm font-medium">{selectedService.name}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Date</span>
+                          <span className="text-sm font-medium">
+                            {selectedDate
+                              ? format(selectedDate, "MMM d, yyyy")
+                              : "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Time</span>
+                          <span className="text-sm font-medium">
+                            {form.watch("time") || "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Duration</span>
+                          <span className="text-sm font-medium">
+                            {selectedService.durationMinutes} min
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Date</span>
-                        <span className="font-medium">
-                          {selectedDate
-                            ? format(selectedDate, "EEE, MMM d yyyy")
-                            : "-"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Time</span>
-                        <span className="font-medium">
-                          {form.watch("time") || "-"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2">
-                        <span className="text-muted-foreground">Duration</span>
-                        <span className="font-medium">
-                          {selectedService.durationMinutes} min
-                        </span>
-                      </div>
-                      <div className="mt-3 border-t pt-3 flex items-center justify-between">
-                        <span className="text-muted-foreground">Total</span>
-                        <span className="text-lg font-semibold">
-                          {formatPrice(
-                            selectedService.priceCents,
-                            selectedService.currency
-                          )}
-                        </span>
+                      <div className="border-t pt-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Total</span>
+                          <span className="text-lg font-bold">
+                            {formatPrice(selectedService.priceCents, selectedService.currency)}
+                          </span>
+                        </div>
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Select a service to see your booking summary.
+                    <p className="text-xs text-muted-foreground">
+                      Select a service to see details
                     </p>
                   )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Need to manage a booking?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <p>
-                    You can view and cancel your upcoming appointments from your
-                    bookings dashboard at any time.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-2 w-full"
-                    onClick={() => router.push("/bookings")}
-                  >
-                    Go to my bookings
-                  </Button>
                 </CardContent>
               </Card>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
-
-

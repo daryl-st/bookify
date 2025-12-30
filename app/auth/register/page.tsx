@@ -50,10 +50,13 @@ export default function Register() {
             }
 
             const result = await res.json();
-            alert("Welcome: " +  result.user.name)
-
-            // save tokens or user data if API returns (localStorage.setItem)
-            router.push("/");
+            
+            // Redirect based on role
+            if (result.user.role === "ADMIN") {
+              router.push("/admin");
+            } else {
+              router.push("/dashboard");
+            }
         } catch (err: unknown) {
             if (err instanceof Error) {
                 alert(err.message);
