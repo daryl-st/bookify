@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AppHeader } from "@/components/shared/app-header";
 
 type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
 
@@ -125,6 +126,7 @@ export default function BookingsPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <AppHeader />
       <main className="container mx-auto flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl space-y-8">
           <div className="space-y-2">
@@ -140,8 +142,8 @@ export default function BookingsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Upcoming & past bookings</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => router.push("/book")}>
-                Book another service
+              <Button size="sm" variant="outline" onClick={() => router.push("/dashboard")}>
+                Go to Dashboard
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
