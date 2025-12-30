@@ -48,12 +48,12 @@ export function Header() {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink
-                href="#demo"
+                href="/book"
                 className={cn(
                   "group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                 )}
               >
-                Demo
+                Book
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -69,9 +69,9 @@ export function Header() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <Link href="/auth/register">
+        <Link href="/book">
           <Button className="group bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
-            Get Started
+            Book now
             <Sparkles className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
           </Button>
         </Link>
