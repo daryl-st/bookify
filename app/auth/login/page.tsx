@@ -71,16 +71,13 @@ export default function Register() {
                             <FormField 
                                 control={form.control}
                                 name="email"
-                                render={({ field, fieldState }) => (
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
                                             <Input type="email" placeholder="m@example.com" {...field}/>
                                         </FormControl>
                                         <FormMessage className="text-red-500" />
-                                        {fieldState.error && (
-                                            <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                                        )}
                                     </FormItem>
                                 )}    
                             />
@@ -88,15 +85,12 @@ export default function Register() {
                             <FormField 
                                 control={form.control}
                                 name="password"
-                                render={({ field, fieldState }) => (
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
                                             <Input type="password" placeholder="********" {...field}/>
                                         </FormControl>
-                                        {fieldState.error && (
-                                            <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                                        )}
                                     </FormItem>
                                 )}
                             />

@@ -71,15 +71,15 @@ export function Hero() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
-                <Link href="#demo">
+                <Link href="/book">
                   <Button size="lg" className="group w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25">
-                    Start Free Trial
+                    Book a Service
                     <Play className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
-                <Link href="#contact">
+                <Link href="/auth/register">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto border-2">
-                    Watch Demo
+                    Start Free Trial
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
