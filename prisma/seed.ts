@@ -29,7 +29,7 @@ async function main() {
   });
 
   const service = await prisma.service.upsert({
-    where: { name: "Premium Consultation" },
+    where: { name: "Premium Consultation", id: "001" },
     update: {},
     create: {
       name: "Premium Consultation",
