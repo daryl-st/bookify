@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -18,59 +17,111 @@ enum BookingStatus {
   CANCELLED
 }
 
+// Better Auth core user (extended with `role` for app RBAC)
 model User {
-  id           String   @id @default(uuid())
-  name         String?
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(CUSTOMER)
-  bookings     Booking[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  bookings      Booking[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                   String    @id @default(uuid())
+  accountId            String
+  providerId           String
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  password             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
 }
 
 model Service {
-  id              String        @id @default(uuid())
+  id              String         @id @default(uuid())
   name            String
   description     String?
-  priceCents      Int           // store as integer cents to avoid floating issues
-  currency        String        @default("USD")
-  durationMinutes Int           // default slot duration for this service
-  capacity        Int           @default(1)
+  priceCents      Int
+  currency        String         @default("USD")
+  timezone        String         @default("UTC")
+  durationMinutes Int
+  capacity        Int            @default(1)
   bookings        Booking[]
   availability    Availability[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 model Availability {
   id              String   @id @default(uuid())
   service         Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId       String
-  // Either dayOfWeek (0-6) for weekly repeating, or date for a specific day
   dayOfWeek       Int?
   date            DateTime?
-  openTime        String   // HH:mm (24h)
-  closeTime       String   // HH:mm (24h)
-  durationMinutes Int      // minutes per slot for this availability
+  openTime        String
+  closeTime       String
+  durationMinutes Int
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Booking {
-  id         String        @id @default(uuid())
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-  service    Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  serviceId  String
-  startTime  DateTime
-  endTime    DateTime
-  status     BookingStatus @default(CONFIRMED)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id        String        @id @default(uuid())
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  service   Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId String
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(CONFIRMED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   @@index([userId])
   @@index([serviceId, startTime])
-  @@unique([serviceId, startTime])
+  @@index([serviceId, startTime, status])
 }
-

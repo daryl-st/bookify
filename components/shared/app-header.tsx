@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BookOpen, LogOut, User } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
-type User = {
+type MeUser = {
   id: string;
   email: string;
   name: string | null;
@@ -15,7 +16,7 @@ type User = {
 
 export function AppHeader() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<MeUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export function AppHeader() {
           const data = await res.json();
           setUser(data.user);
         }
-      } catch (err) {
+      } catch {
         // Not authenticated
       } finally {
         setLoading(false);
@@ -37,11 +38,11 @@ export function AppHeader() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/auth/login");
-    } catch (err) {
-      router.push("/auth/login");
+      await authClient.signOut();
+    } catch {
+      // still navigate away
     }
+    router.push("/auth/login");
   };
 
   return (
@@ -91,4 +92,3 @@ export function AppHeader() {
     </header>
   );
 }
-

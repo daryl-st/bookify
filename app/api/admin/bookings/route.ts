@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    requireAuth(req, ["ADMIN"]);
+    await requireAuth(req, ["ADMIN"]);
     const bookings = await prisma.booking.findMany({
       include: { user: true, service: true },
       orderBy: { startTime: "desc" },

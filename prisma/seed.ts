@@ -1,34 +1,55 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import "dotenv/config";
 
-const prisma = new PrismaClient();
+import { hashPassword } from "better-auth/crypto";
+
+import { prisma } from "../lib/prisma";
+
+async function ensureCredentialUser(
+  email: string,
+  name: string,
+  role: "ADMIN" | "CUSTOMER",
+  plainPassword: string
+) {
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) return existing;
+
+  const userId = crypto.randomUUID();
+  const hashed = await hashPassword(plainPassword);
+
+  return prisma.user.create({
+    data: {
+      id: userId,
+      name,
+      email,
+      emailVerified: true,
+      role,
+      accounts: {
+        create: {
+          id: crypto.randomUUID(),
+          accountId: userId,
+          providerId: "credential",
+          password: hashed,
+        },
+      },
+    },
+  });
+}
 
 async function main() {
-  const passwordHash = await bcrypt.hash("password123", 10);
+  const admin = await ensureCredentialUser(
+    "admin@bookify.test",
+    "Admin User",
+    "ADMIN",
+    "password123"
+  );
 
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@bookify.test" },
-    update: {},
-    create: {
-      email: "admin@bookify.test",
-      name: "Admin User",
-      passwordHash,
-      role: "ADMIN",
-    },
-  });
+  const customer = await ensureCredentialUser(
+    "customer@bookify.test",
+    "Sample Customer",
+    "CUSTOMER",
+    "password123"
+  );
 
-  const customer = await prisma.user.upsert({
-    where: { email: "customer@bookify.test" },
-    update: {},
-    create: {
-      email: "customer@bookify.test",
-      name: "Sample Customer",
-      passwordHash,
-      role: "CUSTOMER",
-    },
-  });
-
-  // Create multiple services with different availability patterns
   const consultation = await prisma.service.upsert({
     where: { id: "001" },
     update: {},
@@ -99,22 +120,20 @@ async function main() {
     },
   });
 
-  // Clear existing availability
   await prisma.availability.deleteMany({});
 
-  // Premium Consultation: Monday & Wednesday, 9 AM - 5 PM, 60 min slots
   await prisma.availability.createMany({
     data: [
       {
         serviceId: consultation.id,
-        dayOfWeek: 1, // Monday
+        dayOfWeek: 1,
         openTime: "09:00",
         closeTime: "17:00",
         durationMinutes: 60,
       },
       {
         serviceId: consultation.id,
-        dayOfWeek: 3, // Wednesday
+        dayOfWeek: 3,
         openTime: "09:00",
         closeTime: "17:00",
         durationMinutes: 60,
@@ -122,19 +141,18 @@ async function main() {
     ],
   });
 
-  // Quick Session: Tuesday & Thursday, 10 AM - 3 PM, 30 min slots
   await prisma.availability.createMany({
     data: [
       {
         serviceId: quickSession.id,
-        dayOfWeek: 2, // Tuesday
+        dayOfWeek: 2,
         openTime: "10:00",
         closeTime: "15:00",
         durationMinutes: 30,
       },
       {
         serviceId: quickSession.id,
-        dayOfWeek: 4, // Thursday
+        dayOfWeek: 4,
         openTime: "10:00",
         closeTime: "15:00",
         durationMinutes: 30,
@@ -142,12 +160,11 @@ async function main() {
     ],
   });
 
-  // Group Workshop: Saturday, 10 AM - 2 PM, 120 min slots
   await prisma.availability.createMany({
     data: [
       {
         serviceId: groupWorkshop.id,
-        dayOfWeek: 6, // Saturday
+        dayOfWeek: 6,
         openTime: "10:00",
         closeTime: "14:00",
         durationMinutes: 120,
@@ -155,12 +172,11 @@ async function main() {
     ],
   });
 
-  // Extended Session: Friday, 9 AM - 4 PM, 90 min slots
   await prisma.availability.createMany({
     data: [
       {
         serviceId: extendedSession.id,
-        dayOfWeek: 5, // Friday
+        dayOfWeek: 5,
         openTime: "09:00",
         closeTime: "16:00",
         durationMinutes: 90,
@@ -168,26 +184,25 @@ async function main() {
     ],
   });
 
-  // Evening Consultation: Monday, Wednesday, Friday, 5 PM - 9 PM, 60 min slots
   await prisma.availability.createMany({
     data: [
       {
         serviceId: eveningConsultation.id,
-        dayOfWeek: 1, // Monday
+        dayOfWeek: 1,
         openTime: "17:00",
         closeTime: "21:00",
         durationMinutes: 60,
       },
       {
         serviceId: eveningConsultation.id,
-        dayOfWeek: 3, // Wednesday
+        dayOfWeek: 3,
         openTime: "17:00",
         closeTime: "21:00",
         durationMinutes: 60,
       },
       {
         serviceId: eveningConsultation.id,
-        dayOfWeek: 5, // Friday
+        dayOfWeek: 5,
         openTime: "17:00",
         closeTime: "21:00",
         durationMinutes: 60,
@@ -195,13 +210,12 @@ async function main() {
     ],
   });
 
-  // Create a sample booking
   await prisma.booking.createMany({
     data: [
       {
         userId: customer.id,
         serviceId: consultation.id,
-        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow
+        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
         endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000),
         status: "CONFIRMED",
       },
@@ -212,6 +226,7 @@ async function main() {
   console.log("Seed completed!");
   console.log("Admin: admin@bookify.test / password123");
   console.log("Customer: customer@bookify.test / password123");
+  console.log(`Admin user id: ${admin.id}`);
   console.log(`Created ${await prisma.service.count()} services`);
   console.log(`Created ${await prisma.availability.count()} availability windows`);
 }

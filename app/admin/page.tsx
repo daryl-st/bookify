@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, Edit2, Calendar, Users, DollarSign, Clock } from "lucide-react";
+import { Plus, Trash2, Calendar, Users, DollarSign, Clock } from "lucide-react";
 import { AppHeader } from "@/components/shared/app-header";
 
 type User = {
@@ -27,6 +27,7 @@ type Service = {
   description: string | null;
   priceCents: number;
   currency: string;
+  timezone: string;
   durationMinutes: number;
   capacity: number;
 };
@@ -44,9 +45,10 @@ const serviceSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().optional(),
   priceCents: z.number().int().positive("Price must be positive"),
-  currency: z.string().length(3, "Currency must be 3 characters").default("USD"),
+  currency: z.string().length(3, "Currency must be 3 characters"),
+  timezone: z.string().min(1, "Timezone is required"),
   durationMinutes: z.number().int().positive("Duration must be positive"),
-  capacity: z.number().int().positive("Capacity must be positive").default(1),
+  capacity: z.number().int().positive("Capacity must be positive"),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
@@ -82,6 +84,7 @@ export default function AdminPage() {
       description: "",
       priceCents: 0,
       currency: "USD",
+      timezone: "UTC",
       durationMinutes: 60,
       capacity: 1,
     },
@@ -423,6 +426,19 @@ export default function AdminPage() {
                             </FormItem>
                           )}
                         />
+                        <FormField
+                          control={serviceForm.control}
+                          name="timezone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Timezone</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., UTC or America/New_York" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                       <FormField
                         control={serviceForm.control}
@@ -475,7 +491,7 @@ export default function AdminPage() {
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                              {service.durationMinutes} min &middot; Capacity: {service.capacity}
+                              {service.durationMinutes} min &middot; Capacity: {service.capacity} &middot; TZ: {service.timezone}
                             </p>
                           </div>
                           <Button

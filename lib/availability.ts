@@ -1,9 +1,21 @@
 import { prisma } from "@/lib/prisma";
-import { addMinutes, isBefore, isEqual, set } from "date-fns";
+import { addDays, addMinutes, isBefore, isEqual } from "date-fns";
+import {
+  DEFAULT_BUSINESS_TIMEZONE,
+  getBusinessDateParts,
+  toUtcFromBusinessDateTime,
+} from "./time";
 
-export function combineDateAndTime(date: Date, time: string) {
-  const [hour, minute] = time.split(":").map(Number);
-  return set(date, { hours: hour, minutes: minute, seconds: 0, milliseconds: 0 });
+export function combineDateAndTime(
+  date: Date,
+  time: string,
+  timezone = DEFAULT_BUSINESS_TIMEZONE
+) {
+  const parts = getBusinessDateParts(date, timezone);
+  const dateString = `${parts.year.toString().padStart(4, "0")}-${parts.month
+    .toString()
+    .padStart(2, "0")}-${parts.day.toString().padStart(2, "0")}`;
+  return toUtcFromBusinessDateTime(dateString, time, timezone);
 }
 
 export function slotsFromAvailability(params: {
@@ -28,10 +40,24 @@ export function slotsFromAvailability(params: {
   return slots;
 }
 
-export async function findAvailabilityForService(serviceId: string, date: Date) {
-  const dayStart = set(date, { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-  const nextDay = addMinutes(dayStart, 60 * 24);
-  const dayOfWeek = dayStart.getDay(); // 0-6, Sunday=0
+export async function findAvailabilityForService(
+  serviceId: string,
+  date: Date,
+  timezone = DEFAULT_BUSINESS_TIMEZONE
+) {
+  const businessDate = getBusinessDateParts(date, timezone);
+  const dayStart = toUtcFromBusinessDateTime(
+    businessDate.isoDate,
+    "00:00",
+    timezone
+  );
+  const nextDayParts = getBusinessDateParts(addDays(dayStart, 1), timezone);
+  const nextDay = toUtcFromBusinessDateTime(
+    nextDayParts.isoDate,
+    "00:00",
+    timezone
+  );
+  const dayOfWeek = businessDate.dayOfWeek; // 0-6, Sunday=0
 
   const availabilities = await prisma.availability.findMany({
     where: {
@@ -56,10 +82,11 @@ export async function isSlotAvailable(params: {
   serviceId: string;
   startTime: Date;
   endTime: Date;
+  capacity?: number;
 }) {
-  const { serviceId, startTime, endTime } = params;
+  const { serviceId, startTime, endTime, capacity = 1 } = params;
 
-  const overlapping = await prisma.booking.findFirst({
+  const overlappingCount = await prisma.booking.count({
     where: {
       serviceId,
       status: { not: "CANCELLED" },
@@ -70,6 +97,6 @@ export async function isSlotAvailable(params: {
     },
   });
 
-  return !overlapping;
+  return overlappingCount < capacity;
 }
 

@@ -21,6 +21,7 @@ type Service = {
   description?: string | null;
   priceCents: number;
   currency: string;
+  timezone: string;
   durationMinutes: number;
 };
 
@@ -215,6 +216,7 @@ export default function BookPage() {
           serviceId: selectedService.id,
           date: values.date,
           startTime: values.time,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 
@@ -473,6 +475,12 @@ export default function BookPage() {
                           <span className="text-xs text-muted-foreground">Duration</span>
                           <span className="text-sm font-medium">
                             {selectedService.durationMinutes} min
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Timezone</span>
+                          <span className="text-sm font-medium">
+                            {selectedService.timezone}
                           </span>
                         </div>
                       </div>

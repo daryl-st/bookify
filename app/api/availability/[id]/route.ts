@@ -15,14 +15,18 @@ const updateSchema = z
     message: "Provide at least one field to update",
   });
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    requireAuth(req, ["ADMIN"]);
+    const { id } = await context.params;
+    await requireAuth(req, ["ADMIN"]);
     const json = await req.json();
     const body = updateSchema.parse(json);
 
     const availability = await prisma.availability.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...body,
         date: body.date ? new Date(body.date) : undefined,
@@ -45,10 +49,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    requireAuth(req, ["ADMIN"]);
-    await prisma.availability.delete({ where: { id: params.id } });
+    const { id } = await context.params;
+    await requireAuth(req, ["ADMIN"]);
+    await prisma.availability.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && error.message === "FORBIDDEN") {
