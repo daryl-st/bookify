@@ -1,13 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
+import { bookingService } from "@/services/booking.service";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const auth = requireAuth(req, ["ADMIN", "CUSTOMER"]);
+    const { id } = await context.params;
+    const auth = await requireAuth(req, ["ADMIN", "CUSTOMER"]);
 
     const booking = await prisma.booking.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { id: true, userId: true, status: true },
     });
 
@@ -19,10 +24,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const updated = await prisma.booking.update({
-      where: { id: params.id },
-      data: { status: "CANCELLED" },
-    });
+    const updated = await bookingService.cancelBooking({ bookingId: id });
 
     return NextResponse.json({ booking: updated });
   } catch (error) {

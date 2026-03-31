@@ -1,72 +1,67 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { NextRequest, NextResponse } from "next/server";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
+import { NextRequest } from "next/server";
 
-type JwtPayload = {
+import { prisma } from "./prisma";
+
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  secret:
+    process.env.BETTER_AUTH_SECRET ??
+    "development-only-better-auth-secret-min-32-chars-long!!",
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  ],
+  advanced: {
+    database: {
+      generateId: () => crypto.randomUUID(),
+    },
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: ["CUSTOMER", "ADMIN"],
+        required: true,
+        defaultValue: "CUSTOMER",
+        input: false,
+      },
+    },
+  },
+  plugins: [nextCookies()],
+});
+
+export type AppSessionUser = {
   userId: string;
-  role: "ADMIN" | "CUSTOMER";
   email: string;
+  role: "ADMIN" | "CUSTOMER";
 };
 
-const TOKEN_COOKIE = "bookify_token";
-
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-const TOKEN_EXPIRY = "7d";
-
-export async function hashPassword(password: string) {
-  const salt = await bcrypt.genSalt(10);
-  return bcrypt.hash(password, salt);
+export async function getSessionFromRequest(req: NextRequest) {
+  return auth.api.getSession({ headers: req.headers });
 }
 
-export function verifyPassword(password: string, hash: string) {
-  return bcrypt.compare(password, hash);
-}
-
-export function signAuthToken(payload: JwtPayload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
-}
-
-export function verifyAuthToken(token: string): JwtPayload | null {
-  try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
-  } catch {
-    return null;
-  }
-}
-
-export function setAuthCookie(res: NextResponse, token: string) {
-  res.cookies.set(TOKEN_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
-}
-
-export function clearAuthCookie(res: NextResponse) {
-  res.cookies.delete(TOKEN_COOKIE);
-}
-
-export function getAuthFromRequest(req: NextRequest): JwtPayload | null {
-  const token =
-    req.cookies.get(TOKEN_COOKIE)?.value ??
-    req.headers.get("authorization")?.replace("Bearer ", "");
-  if (!token) return null;
-  return verifyAuthToken(token);
-}
-
-export function requireAuth(
+export async function requireAuth(
   req: NextRequest,
   roles?: Array<"ADMIN" | "CUSTOMER">
-): JwtPayload {
-  const auth = getAuthFromRequest(req);
-  if (!auth) {
+): Promise<AppSessionUser> {
+  const session = await getSessionFromRequest(req);
+  if (!session?.user) {
     throw new Error("UNAUTHORIZED");
   }
-  if (roles && !roles.includes(auth.role)) {
+  const role = session.user.role as "ADMIN" | "CUSTOMER";
+  if (roles && !roles.includes(role)) {
     throw new Error("FORBIDDEN");
   }
-  return auth;
+  return {
+    userId: session.user.id,
+    email: session.user.email,
+    role,
+  };
 }
-

@@ -4,7 +4,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "customer" | "admin";
+  emailVerified: boolean;
+  image?: string | null;
+  role: "CUSTOMER" | "ADMIN";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,12 +17,7 @@ export interface Booking {
   serviceId: string;
   startTime: Date;
   endTime: Date;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
-  paymentStatus: "pending" | "paid" | "refunded";
-  amount: number;
-  currency: string;
-  cancellationReason?: string;
-  cancelledAt?: Date;
+  status: "PENDING" | "CONFIRMED" | "CANCELLED";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,11 +25,12 @@ export interface Booking {
 export interface Service {
   id: string;
   name: string;
-  description: string;
-  duration: number; // in minutes
-  price: number;
+  description: string | null;
+  durationMinutes: number; // in minutes
+  priceCents: number;
   currency: string;
-  isActive: boolean;
+  timezone: string;
+  capacity: number;
   createdAt: Date;
   updatedAt: Date;
 }

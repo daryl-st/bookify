@@ -8,6 +8,7 @@ const serviceSchema = z.object({
   description: z.string().optional(),
   priceCents: z.number().int().positive(),
   currency: z.string().min(3).max(3).default("USD"),
+  timezone: z.string().min(1).default("UTC"),
   durationMinutes: z.number().int().positive(),
   capacity: z.number().int().positive().default(1),
 });
@@ -21,7 +22,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    requireAuth(req, ["ADMIN"]);
+    await requireAuth(req, ["ADMIN"]);
     const json = await req.json();
     const body = serviceSchema.parse(json);
 

@@ -8,18 +8,23 @@ const updateSchema = z.object({
   description: z.string().optional(),
   priceCents: z.number().int().positive().optional(),
   currency: z.string().min(3).max(3).optional(),
+  timezone: z.string().min(1).optional(),
   durationMinutes: z.number().int().positive().optional(),
   capacity: z.number().int().positive().optional(),
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    requireAuth(req, ["ADMIN"]);
+    const { id } = await context.params;
+    await requireAuth(req, ["ADMIN"]);
     const json = await req.json();
     const body = updateSchema.parse(json);
 
     const service = await prisma.service.update({
-      where: { id: params.id },
+      where: { id },
       data: body,
     });
 
@@ -39,10 +44,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    requireAuth(req, ["ADMIN"]);
-    await prisma.service.delete({ where: { id: params.id } });
+    const { id } = await context.params;
+    await requireAuth(req, ["ADMIN"]);
+    await prisma.service.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && error.message === "FORBIDDEN") {

@@ -7,6 +7,7 @@ import {
   isSlotAvailable,
 } from "@/lib/availability";
 import { addMinutes, isBefore } from "date-fns";
+import { DEFAULT_BUSINESS_TIMEZONE, toUtcFromBusinessDateTime } from "@/lib/time";
 import { emailService } from "./email.service";
 // import { paymentService } from "./payment.service";
 // import { calendarService } from "./calendar.service";
@@ -15,7 +16,9 @@ import { Booking } from "@prisma/client";
 export interface CreateBookingInput {
   userId: string;
   serviceId: string;
-  startTime: Date;
+  date: string; // YYYY-MM-DD in business timezone
+  startTime: string; // HH:mm in business timezone
+  timezone?: string;
   paymentMethodId?: string;
 }
 
@@ -27,12 +30,6 @@ export interface CancelBookingInput {
 
 export class BookingService {
   async createBooking(input: CreateBookingInput): Promise<Booking> {
-    // TODO: Implement booking creation logic
-    // 1. Validate service availability...DONE
-    // 2. Create booking record...DONE
-    // 3. Process payment if required
-    // 4. Sync with calendar
-    // 5. Send confirmation email
     const service = await prisma.service.findUnique({
       where: { id: input.serviceId },
     });
@@ -40,7 +37,13 @@ export class BookingService {
       throw new Error("SERVICE_NOT_FOUND");
     }
 
-    const requestedStart = new Date(input.startTime);
+    const bookingTimezone =
+      service.timezone || input.timezone || DEFAULT_BUSINESS_TIMEZONE;
+    const requestedStart = toUtcFromBusinessDateTime(
+      input.date,
+      input.startTime,
+      bookingTimezone
+    );
     const requestedEnd = addMinutes(requestedStart, service.durationMinutes);
 
     if (isBefore(requestedStart, new Date())) {
@@ -49,23 +52,16 @@ export class BookingService {
 
     const availability = await findAvailabilityForService(
       input.serviceId,
-      requestedStart
+      requestedStart,
+      bookingTimezone
     );
     if (!availability.length) {
       throw new Error("NO_AVAILABILITY");
     }
 
-    const dateOnly = new Date(
-      Date.UTC(
-        requestedStart.getUTCFullYear(),
-        requestedStart.getUTCMonth(),
-        requestedStart.getUTCDate()
-      )
-    );
-
-    const windowMatch = availability.find((slot) => {
-      const open = combineDateAndTime(dateOnly, slot.openTime);
-      const close = combineDateAndTime(dateOnly, slot.closeTime);
+    const windowMatch = availability.find((slot: { openTime: string; closeTime: string; durationMinutes: number }) => {
+      const open = combineDateAndTime(requestedStart, slot.openTime, bookingTimezone);
+      const close = combineDateAndTime(requestedStart, slot.closeTime, bookingTimezone);
       const duration = slot.durationMinutes || service.durationMinutes;
       const minutesFromOpen = (requestedStart.getTime() - open.getTime()) / 60000;
       const aligns = minutesFromOpen >= 0 && minutesFromOpen % duration === 0;
@@ -81,7 +77,9 @@ export class BookingService {
       serviceId: input.serviceId,
       startTime: requestedStart,
       endTime: requestedEnd,
+      capacity: service.capacity,
     });
+
     if (!slotFree) {
       throw new Error("SLOT_UNAVAILABLE");
     }
@@ -97,7 +95,7 @@ export class BookingService {
     });
 
     // Fire-and-forget side effects
-    this.triggerSideEffects(booking).catch((err) =>
+    this.triggerSideEffects(booking, input.userId).catch((err) =>
       console.error("Booking side-effects failed", err)
     );
 
@@ -142,22 +140,17 @@ export class BookingService {
     });
   }
 
-  async checkAvailability(
-    serviceId: string,
-    startTime: Date,
-    endTime: Date
-  ): Promise<boolean> {
-    return isSlotAvailable({ serviceId, startTime, endTime });
-  }
-
-  private async triggerSideEffects(booking: Booking) {
+  private async triggerSideEffects(booking: Booking, userId: string) {
     try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      });
       // Optional: await paymentService.processPayment(...);
       // Optional: await calendarService.syncBooking(...);
-      await emailService.sendBookingConfirmation(
-        "customer@example.com",
-        booking.id
-      );
+      if (user?.email) {
+        await emailService.sendBookingConfirmation(user.email, booking.id);
+      }
     } catch (err) {
       console.error("Side-effect error", err);
     }
@@ -169,15 +162,21 @@ export class BookingService {
     refund?: boolean
   ) {
     try {
+      const existing = await prisma.booking.findUnique({
+        where: { id: booking.id },
+        select: { user: { select: { email: true } } },
+      });
       if (refund) {
         // await paymentService.refundPayment(...);
       }
       // await calendarService.deleteBooking(...);
-      await emailService.sendCancellationNotification(
-        "customer@example.com",
-        booking.id,
-        reason
-      );
+      if (existing?.user.email) {
+        await emailService.sendCancellationNotification(
+          existing.user.email,
+          booking.id,
+          reason
+        );
+      }
     } catch (err) {
       console.error("Cancellation side-effect error", err);
     }
