@@ -19,6 +19,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@/lib/auth-client";
 import { BookOpen } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { SeedLoginHint } from "@/components/seed-login-hint";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -74,7 +76,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="border-b border-border px-4 py-3 sm:px-6">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-6">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
@@ -84,6 +86,7 @@ export default function LoginPage() {
           </span>
           Bookify
         </Link>
+        <ThemeToggle />
       </div>
       <div className="flex flex-1 items-center justify-center p-6">
         <Card className="w-full max-w-md border-border/80 shadow-none">
@@ -105,6 +108,7 @@ export default function LoginPage() {
                 {submitError}
               </p>
             )}
+            <SeedLoginHint className="mb-4" />
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField

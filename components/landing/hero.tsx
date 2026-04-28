@@ -11,9 +11,9 @@ export function Hero() {
         aria-hidden
       >
         <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,oklch(0.88_0.01_260)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.88_0.01_260)_1px,transparent_1px)] [background-size:48px_48px]"
+          className="absolute inset-0 bg-[linear-gradient(to_right,oklch(0.88_0.01_260)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.88_0.01_260)_1px,transparent_1px)] [background-size:48px_48px] dark:bg-[linear-gradient(to_right,oklch(0.28_0.02_260)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.28_0.02_260)_1px,transparent_1px)]"
         />
-        <div className="absolute right-0 top-0 h-[min(70vh,640px)] w-[min(45vw,520px)] bg-gradient-to-bl from-primary/[0.07] via-transparent to-transparent" />
+        <div className="absolute right-0 top-0 h-[min(70vh,640px)] w-[min(45vw,520px)] bg-gradient-to-bl from-primary/[0.07] via-transparent to-transparent dark:from-primary/[0.12]" />
       </div>
 
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">

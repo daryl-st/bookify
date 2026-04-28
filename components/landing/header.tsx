@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   return (
@@ -71,6 +72,7 @@ export function Header() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link href="/auth/login" className="hidden sm:block">
             <Button variant="ghost" size="sm" className="text-muted-foreground">
               Log in

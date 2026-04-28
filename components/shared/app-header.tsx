@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BookOpen, LogOut, User } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type MeUser = {
   id: string;
@@ -61,6 +62,7 @@ export function AppHeader() {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <ThemeToggle />
           {!loading && user && (
             <>
               <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
