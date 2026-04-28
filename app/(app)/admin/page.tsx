@@ -64,6 +64,10 @@ function formatPrice(cents: number, currency: string) {
   }
 }
 
+function bookingStatusLabel(status: Booking["status"]): string {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -76,6 +80,7 @@ export default function AdminPage() {
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [adminError, setAdminError] = useState<string | null>(null);
 
   const serviceForm = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
@@ -108,7 +113,7 @@ export default function AdminPage() {
           return;
         }
         setUser(data.user);
-      } catch (err) {
+      } catch {
         router.push("/auth/login");
       } finally {
         setLoading(false);
@@ -165,6 +170,7 @@ export default function AdminPage() {
 
   const handleCreateService = async (values: ServiceFormValues) => {
     try {
+      setAdminError(null);
       const res = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -185,13 +191,14 @@ export default function AdminPage() {
       setServices((prev) => [...prev, data.service]);
       serviceForm.reset();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to create service");
+      setAdminError(err instanceof Error ? err.message : "Failed to create service");
     }
   };
 
   const handleDeleteService = async (id: string) => {
     if (!confirm("Are you sure you want to delete this service?")) return;
     try {
+      setAdminError(null);
       setDeletingServiceId(id);
       const res = await fetch(`/api/services/${id}`, {
         method: "DELETE",
@@ -205,8 +212,8 @@ export default function AdminPage() {
       if (!res.ok) throw new Error("Failed to delete service");
 
       setServices((prev) => prev.filter((s) => s.id !== id));
-    } catch (err) {
-      alert("Failed to delete service");
+    } catch {
+      setAdminError("Failed to delete service");
     } finally {
       setDeletingServiceId(null);
     }
@@ -214,6 +221,7 @@ export default function AdminPage() {
 
   const handleCancelBooking = async (id: string) => {
     try {
+      setAdminError(null);
       setCancellingBookingId(id);
       const res = await fetch(`/api/bookings/${id}`, {
         method: "DELETE",
@@ -230,8 +238,8 @@ export default function AdminPage() {
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: data.booking.status } : b))
       );
-    } catch (err) {
-      alert("Failed to cancel booking");
+    } catch {
+      setAdminError("Failed to cancel booking");
     } finally {
       setCancellingBookingId(null);
     }
@@ -239,8 +247,8 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading…</p>
       </div>
     );
   }
@@ -257,23 +265,34 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <main className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <div className="flex items-center justify-between">
+      <main className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:py-10 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Manage services and bookings
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                Admin
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+                Dashboard
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Services and bookings for your organization
               </p>
             </div>
             <Button variant="outline" onClick={() => router.push("/")}>
-              Back to Home
+              Marketing site
             </Button>
           </div>
 
+          {adminError && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {adminError}
+            </p>
+          )}
+
           {/* Stats */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
+          <div className="grid gap-3 md:grid-cols-4 md:gap-4">
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -284,7 +303,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -295,7 +314,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -306,7 +325,7 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -322,22 +341,24 @@ export default function AdminPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b">
+          <div className="inline-flex rounded-lg border border-border/80 bg-muted/30 p-1">
             <button
+              type="button"
               onClick={() => setActiveTab("services")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === "services"
-                  ? "border-b-2 border-primary text-primary"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Services
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("bookings")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === "bookings"
-                  ? "border-b-2 border-primary text-primary"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -348,9 +369,9 @@ export default function AdminPage() {
           {/* Services Tab */}
           {activeTab === "services" && (
             <div className="space-y-6">
-              <Card>
+              <Card className="border-border/80 shadow-none">
                 <CardHeader>
-                  <CardTitle>Create New Service</CardTitle>
+                  <CardTitle className="text-base font-semibold">Create service</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Form {...serviceForm}>
@@ -462,9 +483,9 @@ export default function AdminPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-border/80 shadow-none">
                 <CardHeader>
-                  <CardTitle>All Services</CardTitle>
+                  <CardTitle className="text-base font-semibold">All services</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {servicesLoading ? (
@@ -476,7 +497,7 @@ export default function AdminPage() {
                       {services.map((service) => (
                         <div
                           key={service.id}
-                          className="flex items-center justify-between rounded-lg border p-4"
+                          className="flex items-center justify-between rounded-lg border border-border/80 bg-card/50 p-4"
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -513,9 +534,9 @@ export default function AdminPage() {
 
           {/* Bookings Tab */}
           {activeTab === "bookings" && (
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardHeader>
-                <CardTitle>All Bookings</CardTitle>
+                <CardTitle className="text-base font-semibold">All bookings</CardTitle>
               </CardHeader>
               <CardContent>
                 {bookingsLoading ? (
@@ -532,7 +553,7 @@ export default function AdminPage() {
                       return (
                         <div
                           key={booking.id}
-                          className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+                          className="flex flex-col gap-3 rounded-lg border border-border/80 bg-card/50 p-4 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -546,7 +567,7 @@ export default function AdminPage() {
                                     : "outline"
                                 }
                               >
-                                {booking.status.toLowerCase()}
+                                {bookingStatusLabel(booking.status)}
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground">

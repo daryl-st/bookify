@@ -52,6 +52,10 @@ function statusVariant(status: BookingStatus): "default" | "outline" | "destruct
   }
 }
 
+function statusLabel(status: BookingStatus): string {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -59,6 +63,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -74,7 +79,7 @@ export default function DashboardPage() {
           router.push("/admin");
           return;
         }
-      } catch (err) {
+      } catch {
         router.push("/auth/login");
       }
     };
@@ -107,6 +112,7 @@ export default function DashboardPage() {
 
   const handleCancel = async (id: string) => {
     try {
+      setCancelError(null);
       setCancellingId(id);
       const res = await fetch(`/api/bookings/${id}`, {
         method: "DELETE",
@@ -129,7 +135,7 @@ export default function DashboardPage() {
         prev.map((b) => (b.id === updated.id ? { ...b, status: updated.status } : b))
       );
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to cancel booking");
+      setCancelError(err instanceof Error ? err.message : "Failed to cancel booking");
     } finally {
       setCancellingId(null);
     }
@@ -157,23 +163,32 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <main className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl space-y-6">
-          <div className="flex items-center justify-between">
+      <main className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:py-10 lg:px-8">
+        <div className="mx-auto max-w-6xl space-y-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">My Dashboard</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                View your bookings and statistics
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                Customer
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+                Dashboard
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Bookings and quick stats
               </p>
             </div>
-            <Button onClick={() => router.push("/book")}>
-              Book a Service
-            </Button>
+            <Button onClick={() => router.push("/book")}>Book a service</Button>
           </div>
 
+          {cancelError && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {cancelError}
+            </p>
+          )}
+
           {/* Stats */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
+          <div className="grid gap-3 md:grid-cols-4 md:gap-4">
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -184,7 +199,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -195,7 +210,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -208,7 +223,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-border/80 shadow-none">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -222,9 +237,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Upcoming Bookings */}
-          <Card>
+          <Card className="border-border/80 shadow-none">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Upcoming Bookings</CardTitle>
+              <CardTitle className="text-base font-semibold">Upcoming bookings</CardTitle>
               <Button size="sm" variant="outline" onClick={() => router.push("/book")}>
                 Book another service
               </Button>
@@ -251,15 +266,15 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={booking.id}
-                      className="flex flex-col gap-3 rounded-lg border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-lg border border-border/80 bg-card/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-semibold sm:text-base">
                             {booking.service?.name ?? "Service"}
                           </span>
                           <Badge variant={statusVariant(booking.status)}>
-                            {booking.status.toLowerCase()}
+                            {statusLabel(booking.status)}
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
@@ -294,9 +309,9 @@ export default function DashboardPage() {
           </Card>
 
           {/* All Bookings */}
-          <Card>
+          <Card className="border-border/80 shadow-none">
             <CardHeader>
-              <CardTitle>All Bookings</CardTitle>
+              <CardTitle className="text-base font-semibold">All bookings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {!loading && !error && bookings.length === 0 && (
@@ -315,15 +330,15 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={booking.id}
-                      className="flex flex-col gap-3 rounded-lg border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-lg border border-border/80 bg-card/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-semibold sm:text-base">
                             {booking.service?.name ?? "Service"}
                           </span>
                           <Badge variant={statusVariant(booking.status)}>
-                            {booking.status.toLowerCase()}
+                            {statusLabel(booking.status)}
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
