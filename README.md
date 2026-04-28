@@ -42,6 +42,24 @@ npm run dev
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Demo accounts (after seed)
+
+Run migrations and seed the database (`DATABASE_URL` required):
+
+```bash
+npx prisma migrate dev
+npm run prisma:seed
+```
+
+Seeded users (password is the same for both):
+
+| Role     | Email                 | Password    |
+|----------|----------------------|-------------|
+| Admin    | `admin@bookify.test` | `password123` |
+| Customer | `customer@bookify.test` | `password123` |
+
+Use the admin account for `/admin`; use the customer account for booking and `/dashboard`. In development, the same details appear on the login and register pages.
+
 ## Project Structure
 
 ```

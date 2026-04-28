@@ -1,200 +1,129 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Play, Sparkles, Zap, TrendingUp } from "lucide-react";
+import { ArrowRight, Calendar, Clock } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-background via-background to-muted/20 py-24 sm:py-32">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl"></div>
-        <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl"></div>
-        <div className="absolute right-1/2 top-1/2 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/3 blur-3xl"></div>
+    <section className="relative overflow-hidden border-b border-border bg-background py-28 sm:py-36">
+      {/* Single restrained graphic: fine grid + soft vertical emphasis */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        aria-hidden
+      >
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_right,oklch(0.88_0.01_260)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.88_0.01_260)_1px,transparent_1px)] [background-size:48px_48px] dark:bg-[linear-gradient(to_right,oklch(0.28_0.02_260)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.28_0.02_260)_1px,transparent_1px)]"
+        />
+        <div className="absolute right-0 top-0 h-[min(70vh,640px)] w-[min(45vw,520px)] bg-gradient-to-bl from-primary/[0.07] via-transparent to-transparent dark:from-primary/[0.12]" />
       </div>
 
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-            {/* Left Content */}
-            <div className="space-y-8 text-center lg:text-left">
-              {/* Badge */}
+          <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-20">
+            <div className="space-y-10 text-center lg:text-left">
               <div className="flex justify-center lg:justify-start">
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-                  <Sparkles className="h-4 w-4" />
-                  <span>Trusted by 10,000+ businesses</span>
-                </div>
+                <span className="inline-flex items-center rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                  Service appointments
+                </span>
               </div>
 
               <div className="space-y-6">
-                <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-                  Book Smarter,
-                  <span className="block bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    Not Harder.
+                <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-6xl sm:tracking-[-0.045em] lg:text-7xl">
+                  Schedule work
+                  <span className="mt-1 block text-foreground/90">
+                    without friction.
                   </span>
                 </h1>
-                <p className="mx-auto max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl lg:mx-0">
-                  The all-in-one booking platform that transforms how you manage appointments. 
-                  Beautiful, powerful, and designed for growth.
+                <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl lg:mx-0">
+                  Bookify helps service businesses publish services, open hours, and
+                  let customers book confirmed time slots—clear for you and for them.
                 </p>
               </div>
 
-              {/* Stats */}
-              <div className="flex flex-wrap items-center justify-center gap-8 lg:justify-start">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Zap className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">99.9%</div>
-                    <div className="text-xs text-muted-foreground">Uptime</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">40%</div>
-                    <div className="text-xs text-muted-foreground">More Bookings</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">5min</div>
-                    <div className="text-xs text-muted-foreground">Setup Time</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
-                <Link href="/book">
-                  <Button size="lg" className="group w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25">
-                    Book a Service
-                    <Play className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:justify-start">
+                <Link href="/book" className="sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="h-12 w-full px-8 text-base font-medium sm:w-auto"
+                  >
+                    Book a service
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/auth/register">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/auth/register" className="sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 w-full border-border bg-background/80 px-8 text-base font-medium backdrop-blur-sm sm:w-auto"
+                  >
+                    Create account
                   </Button>
                 </Link>
               </div>
             </div>
 
-            {/* Right Visual - Enhanced Dashboard Preview */}
-            <div className="relative">
-              <div className="relative">
-                {/* Main Dashboard Card */}
-                <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-card/90 p-8 shadow-2xl backdrop-blur-xl">
-                  {/* Glassmorphism overlay */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 via-primary/3 to-transparent"></div>
-                  
-                  {/* Content */}
-                  <div className="relative z-10 space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-border/50 pb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
-                          <Sparkles className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold">Bookify</div>
-                          <div className="text-xs text-muted-foreground">Dashboard</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1.5">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <span className="text-xs font-semibold text-green-600 dark:text-green-400">Live</span>
-                      </div>
+            {/* Preview: editorial panel, no glass stack */}
+            <div className="relative lg:pl-4">
+              <div className="rounded-2xl border border-border bg-card p-1 shadow-sm">
+                <div className="rounded-xl border border-border/80 bg-background p-6 sm:p-8">
+                  <div className="flex items-center justify-between border-b border-border pb-4">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        Preview
+                      </p>
+                      <p className="text-lg font-semibold tracking-tight">This week</p>
                     </div>
+                    <span className="rounded-md border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      8 bookings
+                    </span>
+                  </div>
 
-                    {/* Visual Calendar Grid */}
-                    <div className="rounded-xl bg-background/80 border border-border/50 p-4">
-                      <div className="mb-3 flex items-center justify-between">
-                        <span className="text-sm font-bold">This Week</span>
-                        <span className="text-xs text-muted-foreground">8 bookings</span>
+                  <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
+                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                      <span key={d}>{d.slice(0, 1)}</span>
+                    ))}
+                  </div>
+                  <div className="mt-2 grid grid-cols-7 gap-1">
+                    {[24, 25, 26, 27, 28, 1, 2].map((d, i) => (
+                      <div
+                        key={`${d}-${i}`}
+                        className={`flex aspect-square items-center justify-center rounded-md text-sm font-medium ${
+                          i === 2
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-transparent text-muted-foreground hover:border-border hover:bg-muted/40"
+                        }`}
+                      >
+                        {d}
                       </div>
-                      <div className="grid grid-cols-7 gap-1.5">
-                        {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                          <div
-                            key={i}
-                            className={`text-center text-xs py-1.5 font-semibold ${
-                              i === 2 ? "text-primary" : "text-muted-foreground"
-                            }`}
-                          >
-                            {day}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-2 grid grid-cols-7 gap-1.5">
-                        {[25, 26, 27, 28, 29, 30, 1].map((date, i) => (
-                          <div
-                            key={i}
-                            className={`relative flex h-10 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
-                              i === 2
-                                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                                : i === 0 || i === 4
-                                ? "bg-primary/10 text-primary"
-                                : "text-muted-foreground hover:bg-muted"
-                            }`}
-                          >
-                            {date}
-                            {i === 2 && (
-                              <div className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary-foreground"></div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    {/* Booking Cards */}
-                    <div className="space-y-2">
-                      {[
-                        { name: "Sarah J.", time: "10:00 AM", status: "confirmed" },
-                        { name: "Michael C.", time: "2:30 PM", status: "confirmed" },
-                      ].map((booking, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-3 rounded-xl bg-background/80 border border-border/50 p-3 shadow-sm"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10">
-                            <div className="h-6 w-6 rounded-full bg-primary/30"></div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold">{booking.name}</div>
-                            <div className="text-xs text-muted-foreground">{booking.time}</div>
-                          </div>
-                          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <ul className="mt-8 space-y-3 border-t border-border pt-6">
+                    {[
+                      { name: "Studio consult", time: "10:00", sub: "Confirmed" },
+                      { name: "Follow-up session", time: "14:30", sub: "Confirmed" },
+                    ].map((row) => (
+                      <li
+                        key={row.name}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/20 px-3 py-2.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{row.name}</p>
+                          <p className="text-xs text-muted-foreground">{row.sub}</p>
                         </div>
-                      ))}
-                    </div>
+                        <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium tabular-nums text-muted-foreground">
+                          <Clock className="h-3.5 w-3.5" />
+                          {row.time}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
 
-                    {/* Stats Bar */}
-                    <div className="grid grid-cols-3 gap-2 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 p-3">
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-primary">24</div>
-                        <div className="text-xs text-muted-foreground">This Month</div>
-                      </div>
-                      <div className="text-center border-x border-border/50">
-                        <div className="text-xl font-bold text-primary">8</div>
-                        <div className="text-xs text-muted-foreground">Today</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-primary">$2.4k</div>
-                        <div className="text-xs text-muted-foreground">Revenue</div>
-                      </div>
-                    </div>
+                  <div className="mt-6 flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    Customers pick a service, date, and slot—then manage bookings in
+                    their dashboard.
                   </div>
                 </div>
-
-                {/* Floating decorative elements */}
-                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-2xl bg-primary/10 blur-xl"></div>
-                <div className="absolute -bottom-6 -left-6 h-32 w-32 rounded-full bg-primary/5 blur-2xl"></div>
               </div>
             </div>
           </div>

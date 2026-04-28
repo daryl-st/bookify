@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BookOpen, LogOut, User } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type MeUser = {
   id: string;
@@ -46,27 +47,31 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-2 transition-transform hover:scale-105">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
-            <BookOpen className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 text-foreground transition-opacity hover:opacity-90"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card">
+            <BookOpen className="h-4 w-4 text-foreground" />
+          </span>
+          <span className="text-sm font-semibold tracking-tight sm:text-base">
             Bookify
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ThemeToggle />
           {!loading && user && (
             <>
               <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
-                <User className="h-4 w-4" />
-                <span className="max-w-[150px] truncate">
+                <User className="h-4 w-4 shrink-0" />
+                <span className="max-w-[160px] truncate">
                   {user.name || user.email}
                 </span>
                 {user.role === "ADMIN" && (
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  <span className="rounded-md border border-border bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                     Admin
                   </span>
                 )}
@@ -75,16 +80,16 @@ export function AppHeader() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="gap-2"
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">Log out</span>
               </Button>
             </>
           )}
           {!loading && !user && (
-            <Button size="sm" onClick={() => router.push("/auth/login")}>
-              Login
+            <Button size="sm" variant="secondary" onClick={() => router.push("/auth/login")}>
+              Log in
             </Button>
           )}
         </div>

@@ -1,147 +1,128 @@
 import Link from "next/link";
-import { BookOpen, Sparkles, Twitter, Linkedin, Github, Mail } from "lucide-react";
+import { BookOpen, Twitter, Linkedin, Github, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export function Footer() {
   return (
-    <footer id="contact" className="relative overflow-hidden border-t border-border bg-gradient-to-b from-background to-muted/20 py-16">
-      {/* Background decoration */}
-      <div className="absolute inset-0">
-        <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-primary/3 blur-3xl"></div>
-        <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-primary/3 blur-3xl"></div>
-      </div>
-
-      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+    <footer id="contact" className="border-t border-border bg-background py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-4">
-          {/* Brand Section */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
-                <BookOpen className="h-5 w-5 text-primary-foreground" />
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-foreground text-background">
+                <BookOpen className="h-4 w-4" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                Bookify
-              </span>
+              <span className="text-lg font-semibold tracking-tight">Bookify</span>
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Professional booking and reservation system for modern businesses. 
-              Transform how you manage appointments.
+              Appointment booking for service businesses—services, availability, and
+              customer dashboards in one app.
             </p>
-            {/* Social Links */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link
                 href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all hover:border-primary/50 hover:bg-primary/5"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                aria-label="Twitter"
               >
-                <Twitter className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                <Twitter className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all hover:border-primary/50 hover:bg-primary/5"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                aria-label="LinkedIn"
               >
-                <Linkedin className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                <Linkedin className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all hover:border-primary/50 hover:bg-primary/5"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                aria-label="GitHub"
               >
-                <Github className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                <Github className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all hover:border-primary/50 hover:bg-primary/5"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                aria-label="Email"
               >
-                <Mail className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                <Mail className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
-          {/* Product Links */}
           <div>
-            <h3 className="mb-4 font-bold text-foreground">Product</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground">
+              Product
+            </h3>
+            <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
                   href="#features"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Features
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#pricing"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  href="#how-it-works"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Pricing
+                  How it works
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#demo"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  href="/book"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Demo
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/integrations"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Integrations
+                  Book
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Company Links */}
           <div>
-            <h3 className="mb-4 font-bold text-foreground">Company</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground">
+              Account
+            </h3>
+            <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
-                  href="/about"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  href="/auth/login"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  About
+                  Log in
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#contact"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  href="/auth/register"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Contact
+                  Register
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blog"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  href="/dashboard"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/careers"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Careers
+                  Dashboard
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal Links */}
           <div>
-            <h3 className="mb-4 font-bold text-foreground">Legal</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground">
+              Legal
+            </h3>
+            <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
                   href="/privacy"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Privacy
                 </Link>
@@ -149,41 +130,22 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-muted-foreground transition-colors hover:text-primary"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Terms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/security"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookies"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Cookies
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <Separator className="my-8 bg-border/50" />
+        <Separator className="my-10" />
 
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Bookify. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span>Made with care for your business</span>
-          </div>
+          <p className="text-sm text-muted-foreground">Built for clarity and speed.</p>
         </div>
       </div>
     </footer>

@@ -250,27 +250,62 @@ export default function BookPage() {
     }
   };
 
+  const step = !selectedServiceId ? 1 : !form.watch("time") ? 2 : 3;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Book a Service
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Select a service and choose your preferred time
+      <div className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:py-10 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-10">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              Booking
             </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              Book a service
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              Choose a service, then a date and available time. You will need to be
+              signed in to confirm.
+            </p>
+            <div
+              className="mt-8 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs font-medium text-muted-foreground sm:text-sm"
+              role="list"
+              aria-label="Booking steps"
+            >
+              {[
+                { n: 1, label: "Service" },
+                { n: 2, label: "Date & time" },
+                { n: 3, label: "Confirm" },
+              ].map((s, i) => (
+                <div key={s.n} className="flex items-center gap-1 sm:gap-2" role="listitem">
+                  {i > 0 && (
+                    <span className="px-1 text-border sm:px-2" aria-hidden>
+                      —
+                    </span>
+                  )}
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs tabular-nums sm:h-8 sm:w-8 ${
+                      step >= s.n
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    {s.n}
+                  </span>
+                  <span className={step >= s.n ? "text-foreground" : ""}>{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
+          <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr] lg:gap-8">
             {/* Main Content */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Service Selection */}
-              <Card className="border-0 shadow-md">
+              <Card className="border-border/80 shadow-none">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Select Service</CardTitle>
+                  <CardTitle className="text-base font-semibold">1 · Select service</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {loadingServices && (
@@ -340,9 +375,11 @@ export default function BookPage() {
 
               {/* Date & Time Selection */}
               {selectedService && (
-                <Card className="border-0 shadow-md">
+                <Card className="border-border/80 shadow-none">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Choose Date & Time</CardTitle>
+                    <CardTitle className="text-base font-semibold">
+                      2 · Date & time
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Form {...form}>
@@ -393,7 +430,7 @@ export default function BookPage() {
                                     No slots available for this date
                                   </p>
                                 )}
-                              <div className="flex flex-wrap gap-2">
+                              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                                 {slots.map((slot) => {
                                   const isSelected = form.watch("time") === slot;
                                   return (
@@ -402,7 +439,7 @@ export default function BookPage() {
                                       type="button"
                                       size="sm"
                                       variant={isSelected ? "default" : "outline"}
-                                      className="h-8 text-xs"
+                                      className="h-9 font-mono text-xs tabular-nums"
                                       onClick={() => form.setValue("time", slot)}
                                     >
                                       {slot}
@@ -421,8 +458,8 @@ export default function BookPage() {
                           </div>
                         )}
                         {bookingSuccess && (
-                          <div className="flex items-center gap-2 rounded-md bg-emerald-50 p-2.5 text-xs text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 p-2.5 text-xs text-primary">
+                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                             {bookingSuccess}
                           </div>
                         )}
@@ -444,10 +481,10 @@ export default function BookPage() {
             </div>
 
             {/* Summary Sidebar */}
-            <div className="lg:sticky lg:top-8 lg:h-fit">
-              <Card className="border-0 shadow-md">
+            <div className="lg:sticky lg:top-24 lg:h-fit">
+              <Card className="border-border/80 shadow-none">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Summary</CardTitle>
+                  <CardTitle className="text-base font-semibold">3 · Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   {selectedService ? (

@@ -57,6 +57,10 @@ function statusVariant(status: BookingStatus): "default" | "outline" | "destruct
   }
 }
 
+function statusLabel(status: BookingStatus): string {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
 export default function BookingsPage() {
   const router = useRouter();
 
@@ -64,6 +68,7 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -93,6 +98,7 @@ export default function BookingsPage() {
 
   const handleCancel = async (id: string) => {
     try {
+      setCancelError(null);
       setCancellingId(id);
       const res = await fetch(`/api/bookings/${id}`, {
         method: "DELETE",
@@ -117,8 +123,9 @@ export default function BookingsPage() {
         prev.map((b) => (b.id === updated.id ? { ...b, status: updated.status } : b))
       );
     } catch (err) {
-      // For now just log; could surface toast/UI later
-      console.error(err);
+      setCancelError(
+        err instanceof Error ? err.message : "Unable to cancel booking"
+      );
     } finally {
       setCancellingId(null);
     }
@@ -127,21 +134,32 @@ export default function BookingsPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <main className="container mx-auto flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <main className="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:py-10 lg:px-8">
         <div className="mx-auto max-w-5xl space-y-8">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              My Bookings
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              Customer
+            </p>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Bookings
             </h1>
-            <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-              View your upcoming appointments and cancel if you can no longer
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Upcoming and past appointments. Cancel open slots you can no longer
               attend.
             </p>
           </div>
 
-          <Card>
+          {cancelError && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {cancelError}
+            </p>
+          )}
+
+          <Card className="border-border/80 shadow-none">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Upcoming & past bookings</CardTitle>
+              <CardTitle className="text-base font-semibold">
+                All bookings
+              </CardTitle>
               <Button size="sm" variant="outline" onClick={() => router.push("/dashboard")}>
                 Go to Dashboard
               </Button>
@@ -174,15 +192,15 @@ export default function BookingsPage() {
                   return (
                     <div
                       key={booking.id}
-                      className="flex flex-col gap-3 rounded-xl border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-lg border border-border/80 bg-card/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-semibold sm:text-base">
                             {booking.service?.name ?? "Service"}
                           </span>
                           <Badge variant={statusVariant(booking.status)}>
-                            {booking.status.toLowerCase()}
+                            {statusLabel(booking.status)}
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
